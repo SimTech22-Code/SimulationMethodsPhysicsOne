@@ -1,0 +1,116 @@
+\RequirePackage[l2tabu,orthodox]{nag} % turn on warnings because of bad style
+\documentclass[a4paper,11pt,bibtotoc]{scrartcl}
+
+\usepackage[utf8]{inputenc}     % This allows to type UTF-8 characters like Ã¤,Ã¶,Ã¼,ÃŸ
+
+\usepackage[T1]{fontenc}        % Tries to use Postscript Type 1 Fonts for better rendering
+\usepackage{lmodern}            % Provides the Latin Modern Font which offers more glyphs than the default Computer Modern
+\usepackage[intlimits]{amsmath} % Provides all mathematical commands
+
+\usepackage{hyperref}           % Provides clickable links in the PDF-document for \ref
+\usepackage{grffile}            % Allow you to include images (like graphicx). Usage: \includegraphics{path/to/file}
+
+% Allows to set units
+\usepackage{siunitx}
+\sisetup{per-mode=fraction}     % Optional
+
+% Additional packages
+\usepackage{url}                % Lets you typeset urls. Usage: \url{http://...}
+\usepackage{breakurl}           % Enables linebreaks for urls
+\usepackage{xspace}             % Use \xpsace in macros to automatically insert space based on context. Usage: \newcommand{\es}{ESPResSo\xspace}
+\usepackage{xcolor}             % Obviously colors. Usage: \color{red} Red text
+\usepackage{booktabs}           % Nice rules for tables. Usage \begin{tabular}\toprule ... \midrule ... \bottomrule
+
+% Source code listings
+\usepackage{listings}           % Source Code Listings. Usage: \begin{lstlisting}...\end{lstlisting}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\footnotesize,
+	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=5pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\begin{document}
+
+\titlehead{Simulation Methods in Physics I \hfill WS 2021/2022}
+\title{Template for a nice \LaTeX{} document}
+\author{NAME1, NAME2}
+\date{\today}
+\publishers{Institute for Computational Physics, University of
+  Stuttgart}
+\maketitle
+
+\tableofcontents
+
+\section{Math}
+
+The package \verb|amsmath| is available for typesetting math. Execute \verb|texdoc amsmath| in your terminal for additional information.
+
+Here is an equation typeset using commands from \verb|amsmath|.
+%
+\begin{align}
+	\alpha &= 
+	\begin{pmatrix}
+		D_1t       & -a_{12}t_2 & \dots & -a_{1n}t_n \\
+		-a_{21}t_1 & D_2t       & \dots & -a_{2n}t_n \\
+		\hdotsfor[2]{4} \\
+		-a_{n1}t_1 & -a_{n2}t_2 & \dots & D_nt
+	\end{pmatrix} \\
+	\beta &= \pi
+\end{align}
+%
+Furthermore don't use \verb|eqnarray| and use \verb|align| instead! (If you don't know what \verb|eqnarray| is, nevermind)
+
+\subsection{Units}
+
+Typesetting units by hand is extremely annoying because you have to take care of spacing and font style, for example
+%
+\begin{verbatim}
+100 \; \mathrm{m} \text{ or } 100 \; \mathrm{\frac{m}{s}}
+\end{verbatim}
+%
+to produce \[ 100 \; \mathrm{m} \text{ or } 100 \; \mathrm{\frac{m}{s}} \]
+That's why we use the package \verb|siunitx| See:
+%
+\begin{verbatim}
+\SI{100}{\meter} \text{ or } \SI{100}{\meter\per\second}
+\end{verbatim}
+%
+to produce $\SI{100}{\meter} \text{ or } \SI{100}{\meter\per\second}$
+
+\section{Code}
+You can include code using \verb|lstlisting|
+
+\begin{lstlisting}[language=Python]
+class HarmonicPotential():
+	def __init__(self, k):
+		self.k = k
+	def calc_energy(self, x):
+		return 0.5*self.k*x**2
+	def calc_force(self, x):
+		return -self.k*x
+		
+\end{lstlisting}
+
+\end{document}
+
