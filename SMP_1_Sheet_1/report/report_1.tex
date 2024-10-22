@@ -53,8 +53,8 @@
 \begin{document}
 
 \titlehead{Simulation Methods in Physics I \hfill WS 2021/2022}
-\title{Template for a nice \LaTeX{} document}
-\author{NAME1, NAME2}
+\title{First exercise sheet in Simulation Methods in Physics I}
+\author{Cedric Frösch, Niklas Abraham}
 \date{\today}
 \publishers{Institute for Computational Physics, University of
   Stuttgart}
@@ -62,55 +62,130 @@
 
 \tableofcontents
 
-\section{Math}
+\section{Exercise 2.1}
 
-The package \verb|amsmath| is available for typesetting math. Execute \verb|texdoc amsmath| in your terminal for additional information.
+In the first exercise we calculated the trajectory of a canonball in the air, without air resistance.
+The task was to test this with a couple of different initial masses. The results are shown in the follwoing diagram:
+% file is in the same folder as this file, name is ex_1.png
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.6\textwidth]{ex_1.png}
+	\caption{Trajectory of a canonball with different masses}
+	\label{fig:ex_1}
+\end{figure}
 
-Here is an equation typeset using commands from \verb|amsmath|.
-%
+\section{Exercise 2.2}
+
+Here we created the diagram with various fricition and wind settings. We used the following settings: first without fricition and wind, then without wind but with friction and last with fricition and wind speeds of -30m/s.
+The results are shown in the following diagram:
+% file is in the same folder as this file, name is ex_2_2.png
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.6\textwidth]{ex_2_1.png}
+	\caption{Trajectory of a canonball with different fricition and wind settings}
+	\label{fig:ex_2_2}
+\end{figure}
+
+The wind speed for which the canonball reaches the starting point is roughly $v_{wind} = -195m/s$.
+
+\section{Exercise 3.1}
+
+In the third exercise we calculated the trajectory of various particles with gravitional forces.
+The plot of the trajectories is shown in the following diagram:
+% ex_3_1_1.png is in the same folder as this file
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.6\textwidth]{ex_3_1_1.png}
+	\caption{Trajectory of various particles with gravitional forces}
+	\label{fig:ex_3_1_1}
+\end{figure}
+
+
+The difference in timestep size between 0.001 and 0.0001 are shown in the resting frame of the moon and earth. The results are shown in the following diagram:
+% ex_3_1_2.png is in the same folder as this file
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.6\textwidth]{ex_3_1_2.png}
+	\caption{Trajectory of particles with different timestep sizes}
+	\label{fig:ex_3_1_2}
+\end{figure}
+
+
+The part using the most time in the simulation is the calculation of the forces between the particles. Since there are two nested loops, the time complexity is $O(n^2)$.
+This could be reduced by using smart saving of results, but still would consume the most time in this code.
+
+\section{Exercise 3.2}
+
+We start with the Taylor expansion of $x(t + \Delta t)$:
 \begin{align}
-	\alpha &= 
-	\begin{pmatrix}
-		D_1t       & -a_{12}t_2 & \dots & -a_{1n}t_n \\
-		-a_{21}t_1 & D_2t       & \dots & -a_{2n}t_n \\
-		\hdotsfor[2]{4} \\
-		-a_{n1}t_1 & -a_{n2}t_2 & \dots & D_nt
-	\end{pmatrix} \\
-	\beta &= \pi
+	x(t + \Delta t) &= x(t) + v(t) \Delta t + \frac{1}{2} a(t) \Delta t^2 + O(\Delta t^3)
 \end{align}
-%
-Furthermore don't use \verb|eqnarray| and use \verb|align| instead! (If you don't know what \verb|eqnarray| is, nevermind)
+That is the position update of the Verlet algorithm.
 
-\subsection{Units}
+For the velocity Verlet algorithm we need to expand $v(t + \Delta t)$:
+\begin{align}
+	v(t + \Delta t) &= v(t) + a(t) \Delta t + \frac{1}{2} \frac{d^2 v(t)}{dt^2} \Delta t^2 + O(\Delta t^3)
+\end{align}
 
-Typesetting units by hand is extremely annoying because you have to take care of spacing and font style, for example
-%
-\begin{verbatim}
-100 \; \mathrm{m} \text{ or } 100 \; \mathrm{\frac{m}{s}}
-\end{verbatim}
-%
-to produce \[ 100 \; \mathrm{m} \text{ or } 100 \; \mathrm{\frac{m}{s}} \]
-That's why we use the package \verb|siunitx| See:
-%
-\begin{verbatim}
-\SI{100}{\meter} \text{ or } \SI{100}{\meter\per\second}
-\end{verbatim}
-%
-to produce $\SI{100}{\meter} \text{ or } \SI{100}{\meter\per\second}$
+We now need to expand $\frac{d^2 v(t)}{dt^2}$ to the first order:
+\begin{align}
+	\frac{d^2 v(t)}{dt^2} &= \frac{d}{dt} a(t) = \frac{a(t + \Delta t) - a(t)}{\Delta t} + O(\Delta t)
+\end{align}
 
-\section{Code}
-You can include code using \verb|lstlisting|
+Combined this results in the velocity Verlet algorithm:
+\begin{align}
+	x(t + \Delta t) &= x(t) + v(t) \Delta t + \frac{1}{2} a(t) \Delta t^2 \\
+	v(t + \Delta t) &= v(t) + \frac{1}{2} (a(t) + a(t + \Delta t)) \Delta t 
+\end{align}	
 
-\begin{lstlisting}[language=Python]
-class HarmonicPotential():
-	def __init__(self, k):
-		self.k = k
-	def calc_energy(self, x):
-		return 0.5*self.k*x**2
-	def calc_force(self, x):
-		return -self.k*x
-		
-\end{lstlisting}
+Now we rearrange the velocity Verlet algorithm to show that it is equivalent to the standard Verlet algorithm:
+\begin{align}
+	x(t + \Delta t) &= x(t) + v(t) \Delta t + \frac{1}{2} a(t) \Delta t^2 \\
+	v(t + \Delta t) &= v(t) + \frac{1}{2} (a(t) + a(t + \Delta t)) \Delta t
+\end{align}
+
+We can now express $a(t + \Delta t)$ using the Verlet algorithm:
+\begin{align}
+	a(t + \Delta t) &= \frac{f(x(t + \Delta t))}{m} \\
+	&= \frac{f(x(t) + v(t) \Delta t + \frac{1}{2} a(t) \Delta t^2)}{m} \\
+	&= \frac{f(x(t)) + f'(x(t)) v(t) \Delta t + \frac{1}{2} f''(x(t)) a(t) \Delta t^2}{m} + O(\Delta t^3)
+\end{align}
+
+We can now plug this into the velocity Verlet algorithm:
+\begin{align}
+	x(t + \Delta t) &= x(t) + v(t) \Delta t + \frac{1}{2} a(t) \Delta t^2 \\
+	v(t + \Delta t) &= v(t) + \frac{1}{2} (a(t) + \frac{f(x(t)) + f'(x(t)) v(t) \Delta t + \frac{1}{2} f''(x(t)) a(t) \Delta t^2}{m}) \Delta t
+\end{align}
+
+We can now rearrange the terms to show that the velocity Verlet algorithm is equivalent to the standard Verlet algorithm:
+
+
+The difficulty of the velocity Verlet algorithm is that we need to calculate the force at the new position $x(t + \Delta t)$, which is not known yet.
+This makes it hard to update the position and velocity at the same time, since we need to calculate the force at the new position.
+
+The different algorithms are compared in the following diagram, where we simulated the trajectory of all particles for one year at a timestep of 0.01 and showed moon in the resting frame of the earth.
+% ex_3_2_1.png is in the same folder as this file
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.6\textwidth]{ex_3_2_1.png}
+	\caption{Trajectory of particles with different integrators}
+	\label{fig:ex_3_2_1}
+\end{figure}
+
+\section{Exercise 3.3}
+
+The results of the different integrators are shown in the following diagram, where we simulated the trajectory of all particles for one year at a timestep of 0.01 and showed the distance from earth to the moon over time.
+The expected results is no change in distance, since the particles are in a stable orbit.
+
+% ex_3_3_1.png is in the same folder as this file
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.6\textwidth]{ex_3_3_1.png}
+	\caption{Distance from earth to moon over time}
+	\label{fig:ex_3_3_1}
+\end{figure}
+
+
 
 \end{document}
 
