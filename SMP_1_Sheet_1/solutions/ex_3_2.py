@@ -17,11 +17,11 @@ def step_symplectic_euler(x, v, dt, mass, g):
 def step_velocity_verlet(x, v, dt, mass, g, force_old):
     # implementing the velocity verlet method
 
-    x_new = x + v * dt + 0.5 * (force_old/mass) * dt**2
+    x_new = x + v * dt + 0.5 * (force_old/mass) * (dt**2)
 
     v_new_half = v + 0.5 * (force_old/mass) * dt
 
-    force_new = ex_3_1.forces(x, mass, g)
+    force_new = ex_3_1.forces(x_new, mass, g)
 
     v_new = v_new_half + 0.5 * (force_new / mass) * dt
 
