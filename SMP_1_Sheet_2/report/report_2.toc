@@ -1,0 +1,2 @@
+\contentsline {section}{\numberline {1}Exercise 2.1}{1}{section.1}%
+\providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

@@ -1,0 +1,82 @@
+\RequirePackage[l2tabu,orthodox]{nag} % turn on warnings because of bad style
+\documentclass[a4paper,11pt,bibtotoc]{scrartcl}
+
+\usepackage[utf8]{inputenc}     % This allows to type UTF-8 characters like Ã¤,Ã¶,Ã¼,ÃŸ
+
+\usepackage[T1]{fontenc}        % Tries to use Postscript Type 1 Fonts for better rendering
+\usepackage{lmodern}            % Provides the Latin Modern Font which offers more glyphs than the default Computer Modern
+\usepackage[intlimits]{amsmath} % Provides all mathematical commands
+
+\usepackage{hyperref}           % Provides clickable links in the PDF-document for \ref
+\usepackage{grffile}            % Allow you to include images (like graphicx). Usage: \includegraphics{path/to/file}
+
+% Allows to set units
+\usepackage{siunitx}
+\sisetup{per-mode=fraction}     % Optional
+
+% Additional packages
+\usepackage{url}                % Lets you typeset urls. Usage: \url{http://...}
+\usepackage{breakurl}           % Enables linebreaks for urls
+\usepackage{xspace}             % Use \xpsace in macros to automatically insert space based on context. Usage: \newcommand{\es}{ESPResSo\xspace}
+\usepackage{xcolor}             % Obviously colors. Usage: \color{red} Red text
+\usepackage{booktabs}           % Nice rules for tables. Usage \begin{tabular}\toprule ... \midrule ... \bottomrule
+
+% Source code listings
+\usepackage{listings}           % Source Code Listings. Usage: \begin{lstlisting}...\end{lstlisting}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\footnotesize,
+	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=5pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\begin{document}
+
+\titlehead{Simulation Methods in Physics I \hfill WS 2021/2022}
+\title{Worksheet 2: Statistical Mechanics and Molecular Dynamics}
+\author{Lena Weber, Niklas Abraham, Cedric Förch}
+\date{\today}
+\publishers{Institute for Computational Physics, University of
+  Stuttgart}
+\maketitle
+
+\tableofcontents
+
+\section{Exercise 2.1}
+
+We know from our lecture that the entropy of a system is related to the number of microstates $\Omega$ using the Boltzmann entropy formula:
+\begin{align}
+	S = k_B \ln(\Omega)
+\end{align}
+
+In the first case of N distinguishable particles, each of which can occupy one of two energy states $\epsilon_1$ and $\epsilon_2$, and a system in equilibrium with $n_1$ particles in state $\epsilon_1$ and $n_2$ particles in state $\epsilon_2$ such that $n_1 + n_2 = N$, we can express the entropy in terms of $\Omega$:
+In order to solve this task, we use binomial coefficients to calculate the number of microstates $\Omega$:
+\begin{align}
+	\Omega = \binom{N}{n_1} = \frac{N!}{n_1! \cdot (N - n_1)!} \\
+\end{align}
+
+
+
+
+\end{document}
+
