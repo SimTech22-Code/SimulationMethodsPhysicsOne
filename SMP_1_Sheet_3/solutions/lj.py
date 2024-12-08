@@ -64,18 +64,13 @@ class Simulation:
         # compute energy matrix
         self.energies()
         potential_energy = 0.5 * np.sum(self.e_pot_ij_matrix) # assuming all particles have a mass of unity
-        kinetic_energy = 0.5 * np.sum(self.v**2) # assuming all particles have a mass of unity
+        kinetic_energy = np.sum(np.linalg.norm(self.v, axis=0)**2) * 0.5 # assuming all particles have a mass of unity
 
-        return potential_energy, kinetic_energy
+        return [potential_energy, kinetic_energy]
 
     def temperature(self):
         # the temperature is defined as the average kinetic energy per degree of freedom
-        # the formula is 1/2 * k_b * T = E_kin / DegreeOfFreedom * N
-        # where DegreeOfFreedom = 2 * N - 2 (since we have N particles and 2 degrees of freedom per particle)
-        # and N is the number of particles
-        # thus T = 2 * E_kin / (2 * N - 2) / N
-        # we assume that all particles have a mass of unity
-        return 2.0 * 0.5 * np.sum(self.v**2) / (2 * self.n - 2) / self.n
+        return 2 * self.energy()[1] / ( 2 * self.n)
 
     def pressure(self):
         # the is defined like this:
@@ -103,6 +98,15 @@ class Simulation:
 
         # second half update of the velocity
         self.v += 0.5 * self.f * self.dt
+
+    def rescale_velocities_to_temp(self, target_temperature, current_temperature):
+        # the temperature is defined as the average kinetic energy per degree of freedom
+        scaling_factor = np.sqrt(target_temperature / current_temperature)
+
+        self.v *= scaling_factor
+
+
+
 
 
 def write_checkpoint(state, path, overwrite=False):
@@ -133,7 +137,22 @@ if __name__ == "__main__":
         type=float,
         default=0.0,
         help='Additional time to simulate.')
+    
+    # next we need a flag to tun on or off the termostate
+    # we write on or off to the flag
+    # the thermostat is a somple velocity scaling thermostat
+    # the temperature is kept constant by scaling the velocities
+    parser.add_argument(
+        '--thermostat',
+        type=str,
+        default='off',
+        help='Thermostat on or off.')
+
     args = parser.parse_args()
+        
+    thermostat_bool = False
+    if args.thermostat == 'on':
+        thermostat_bool = True
 
     np.random.seed(2)
 
@@ -168,6 +187,7 @@ if __name__ == "__main__":
         temperatures = []
         rdfs = []
         time = []
+        extensions = False
     elif args.cpt and os.path.exists(args.cpt):
         logging.info("Reading state from checkpoint.")
         data = read_checkpoint(args.cpt)
@@ -175,11 +195,14 @@ if __name__ == "__main__":
         v = data['v']
         f = data['f']
         time = data['time']
+        final_time = time[-1]
         positions = data['positions']
         energies = data['energies']
         pressures = data['pressures']
         temperatures = data['temperatures']
         rdfs = data['rdfs']
+        extensions = True
+
 
     sim = Simulation(DT, x, v, BOX, R_CUT, SHIFT)
 
@@ -187,18 +210,31 @@ if __name__ == "__main__":
     if args.cpt and os.path.exists(args.cpt):
         sim.f = f
 
-    total_steps = N_TIME_STEPS + int(args.extend / DT)
+    if extensions:
+        logging.info("Extending simulation by %f" % args.extend)
+        total_steps = int(args.extend / DT)
+    else:
+        total_steps = N_TIME_STEPS
 
-    for i in tqdm.tqdm(range(N_TIME_STEPS, total_steps)):
+    for i in tqdm.tqdm(range(total_steps)):
         sim.propagate()
 
         if i % SAMPLING_STRIDE == 0:
             positions.append(sim.x.copy())
             pressures.append(sim.pressure())
             energies.append(sim.energy())
-            temperatures.append(sim.temperature())
+            temp = sim.temperature()
+            temperatures.append(temp)
             rdfs.append(sim.rdf())
-            time.append(i * DT)
+            if extensions:
+                time.append((i * DT) +  final_time)
+            else:
+                time.append(i * DT)
+
+            if thermostat_bool:
+                sim.rescale_velocities_to_temp(1, temp)
+
+
 
     state = {
         'x': sim.x,
