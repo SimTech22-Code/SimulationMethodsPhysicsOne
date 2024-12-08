@@ -63,16 +63,28 @@ class Simulation:
         """Compute and return the energy components of the system."""
         # compute energy matrix
         self.energies()
-        # TODO compute interaction energy from self.e_pot_ij_matrix
-        # TODO calculate kinetic energy from the velocities self.v and return both energy components
+        potential_energy = 0.5 * np.sum(self.e_pot_ij_matrix) # assuming all particles have a mass of unity
+        kinetic_energy = 0.5 * np.sum(self.v**2) # assuming all particles have a mass of unity
+
+        return potential_energy, kinetic_energy
 
     def temperature(self):
-        #TODO
-        pass
+        # the temperature is defined as the average kinetic energy per degree of freedom
+        # the formula is 1/2 * k_b * T = E_kin / DegreeOfFreedom * N
+        # where DegreeOfFreedom = 2 * N - 2 (since we have N particles and 2 degrees of freedom per particle)
+        # and N is the number of particles
+        # thus T = 2 * E_kin / (2 * N - 2) / N
+        # we assume that all particles have a mass of unity
+        return 2.0 * 0.5 * np.sum(self.v**2) / (2 * self.n - 2) / self.n
 
     def pressure(self):
-        #TODO
-        pass
+        # the is defined like this:
+        # P = 1/2A * ( \sum_{i=1}^{N} m v_i^2 + \sum_{i=1}^{N} \sum_{j=i+1}^{N} r_ij f_ij )
+        # where A is the area of the box
+        # and r_ij is the distance vector between particle i and j
+        # and f_ij is the force vector between particle i and j
+        # we assume that all particles have a mass of unity
+        return 1.0 / np.prod(self.box) * (np.sum(self.v**2) + np.sum(np.sum(self.r_ij_matrix * self.f_ij_matrix, axis=2)))
 
     def rdf(self):
         #TODO
@@ -155,12 +167,14 @@ if __name__ == "__main__":
         pressures = []
         temperatures = []
         rdfs = []
+        time = []
     elif args.cpt and os.path.exists(args.cpt):
         logging.info("Reading state from checkpoint.")
         data = read_checkpoint(args.cpt)
         x = data['x']
         v = data['v']
         f = data['f']
+        time = data['time']
         positions = data['positions']
         energies = data['energies']
         pressures = data['pressures']
@@ -181,9 +195,10 @@ if __name__ == "__main__":
         if i % SAMPLING_STRIDE == 0:
             positions.append(sim.x.copy())
             pressures.append(sim.pressure())
-            energies.append(np.sum(sim.energy()))
+            energies.append(sim.energy())
             temperatures.append(sim.temperature())
             rdfs.append(sim.rdf())
+            time.append(i * DT)
 
     state = {
         'x': sim.x,
@@ -193,6 +208,7 @@ if __name__ == "__main__":
         'energies': energies,
         'pressures': pressures,
         'temperatures': temperatures,
-        'rdfs': rdfs
+        'rdfs': rdfs,
+        'time': time
     }
     write_checkpoint(state, args.cpt, overwrite=True)
