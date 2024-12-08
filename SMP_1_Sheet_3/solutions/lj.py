@@ -12,13 +12,16 @@ import tqdm
 
 # introduce classes to the students
 class Simulation:
-    def __init__(self, dt, x, v, box, r_cut, shift):
+    def __init__(self, dt, x, v, box, r_cut, shift, thermostat, warmup, f_max):
         self.dt = dt
         self.x = x.copy()
         self.v = v.copy()
         self.box = box.copy()
         self.r_cut = r_cut
         self.shift = shift
+        self.thermostat = thermostat
+        self.warmup = warmup
+        self.f_max = f_max
 
         self.n_dims = self.x.shape[0]
         self.n = self.x.shape[1]
@@ -82,8 +85,21 @@ class Simulation:
         return 1.0 / np.prod(self.box) * (np.sum(self.v**2) + np.sum(np.sum(self.r_ij_matrix * self.f_ij_matrix, axis=2)))
 
     def rdf(self):
-        #TODO
-        pass
+        # compute the radial distribution function
+        # we need to compute the radial distribution function
+        # we need to compute the histogram of the distances
+
+        r = np.linalg.norm(self.r_ij_matrix, axis=2)
+        # we need to compute the histogram of the distances
+        h, b = np.histogram(r.flatten(), bins=100, range=(0.8, 5.0))
+        bin_r = 0.5 * (b[1:] + b[:-1])
+        # we need to compute the radial distribution function
+        # g(r) = 1 / (rho * 4 * pi * r^2 * dr) * sum_ij <delta(r - |r_ij|)>
+        n = 1/(4*np.pi*DENSITY*bin_r**2)
+
+        return (h *n, bin_r)
+
+
 
     def propagate(self):
         # update positions
@@ -94,6 +110,17 @@ class Simulation:
 
         # compute new forces
         self.forces()
+
+        if self.warmup:
+            capped_f = np.where(np.abs(self.f) > self.f_max, np.sign(self.f) * self.f_max, self.f)
+
+            # if capped froce are the same as the original forces, we are done
+            if np.allclose(capped_f, self.f):
+                self.f = capped_f
+                self.warmup = False
+            else:
+                self.f = capped_f
+
         # we assume that all particles have a mass of unity
 
         # second half update of the velocity
@@ -147,12 +174,25 @@ if __name__ == "__main__":
         type=str,
         default='off',
         help='Thermostat on or off.')
+    
+    # add the warm up time to the simulation
+    parser.add_argument(
+        '--warmup',
+        type=str,
+        default='off',
+        help='Warmup time.')
+    
 
     args = parser.parse_args()
         
     thermostat_bool = False
     if args.thermostat == 'on':
         thermostat_bool = True
+
+    warmpup_bool = False
+    if args.warmup != 'off':
+        warmup_bool = True
+
 
     np.random.seed(2)
 
@@ -172,11 +212,15 @@ if __name__ == "__main__":
 
     SAMPLING_STRIDE = 3
 
+    F_MAX = 20.0
+
     if not args.cpt or not os.path.exists(args.cpt):
         logging.info("Starting from scratch.")
         # particle positions
-        x = np.array(list(itertools.product(np.linspace(0, BOX[0], N_PER_SIDE, endpoint=False),
-                                            np.linspace(0, BOX[1], N_PER_SIDE, endpoint=False)))).T
+        # x = np.array(list(itertools.product(np.linspace(0, BOX[0], N_PER_SIDE, endpoint=False),
+        #                                    np.linspace(0, BOX[1], N_PER_SIDE, endpoint=False)))).T
+        # positions are now supposed to me randomly distributed
+        x = np.random.random((DIM, N_PART)) * BOX[:, np.newaxis]
 
         # random particle velocities
         v = 0.5*(2.0 * np.random.random((DIM, N_PART)) - 1.0)
@@ -204,7 +248,7 @@ if __name__ == "__main__":
         extensions = True
 
 
-    sim = Simulation(DT, x, v, BOX, R_CUT, SHIFT)
+    sim = Simulation(DT, x, v, BOX, R_CUT, SHIFT, thermostat_bool, warmup_bool, F_MAX)
 
     # If checkpoint is used, also the forces have to be reloaded!
     if args.cpt and os.path.exists(args.cpt):
@@ -217,6 +261,12 @@ if __name__ == "__main__":
         total_steps = N_TIME_STEPS
 
     for i in tqdm.tqdm(range(total_steps)):
+
+        if sim.warmup:
+            logging.info("Warmup step %d" % i)
+            # increase max force by 10% every step
+            sim.f_max *= 1.1  
+
         sim.propagate()
 
         if i % SAMPLING_STRIDE == 0:
@@ -232,7 +282,7 @@ if __name__ == "__main__":
                 time.append(i * DT)
 
             if thermostat_bool:
-                sim.rescale_velocities_to_temp(1, temp)
+                sim.rescale_velocities_to_temp(0.3, temp)
 
 
 

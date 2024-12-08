@@ -18,6 +18,37 @@ def running_average(O, M):
         running_average[i] = np.mean(O[max(0, i - M):min(N, i + M)])
     return running_average
 
+def plot_rdfs(data):
+    """
+    # compute the radial distribution function
+        # we need to compute the radial distribution function
+        # we need to compute the histogram of the distances
+
+        r = np.linalg.norm(self.r_ij_matrix, axis=2)
+        # we need to compute the histogram of the distances
+        h, b = np.histogram(r.flatten(), bins=100, range=(0.8, 5.0))
+        bin_r = 0.5 * (b[1:] + b[:-1])
+        # we need to compute the radial distribution function
+        # g(r) = 1 / (rho * 4 * pi * r^2 * dr) * sum_ij <delta(r - |r_ij|)>
+        n = 1/(4*np.pi*DENSITY*bin_r**2)
+
+        return (h *n, bin_r)
+    """
+    rdfs_data  = data['rdfs']
+    # rdfs_data is a list of tuples
+    # each tuple contains two arrays
+    # the first array is the radial distribution function
+    # the second array is the binning array
+
+    rdfs = [rdf for rdf, bin_r in rdfs_data]
+    bin_r = rdfs_data[0][1]
+
+    # plot the average of the radial distribution functions
+    plt.plot(bin_r, np.mean(rdfs, axis=0))
+    plt.xlabel("r")
+    plt.ylabel("g(r)")
+    plt.title("Radial Distribution Function")
+    plt.show()
 
 def plot_pressure(data):
     # this function should plot the pressure as a function of time
@@ -58,7 +89,7 @@ def plot_energy(data):
 if __name__ == "__main__":
 
 
-    path = '/home/niklas/Desktop/Uni_Niklas/Semester_5/SimulationMethodsPhysicsOne/test_temp_3.pkl'
+    path = '/home/niklas/Desktop/Uni_Niklas/Semester_5/SimulationMethodsPhysicsOne/test_warmup_3.pkl'
 
     with open(path, 'rb') as fp:
         data = pickle.load(fp)
@@ -91,3 +122,6 @@ if __name__ == "__main__":
     plt.ylabel("Temperature")
     plt.legend()
     plt.show()
+
+
+    plot_rdfs(data)
