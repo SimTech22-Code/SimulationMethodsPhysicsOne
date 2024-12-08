@@ -89,7 +89,7 @@ def plot_energy(data):
 if __name__ == "__main__":
 
 
-    path = '/home/niklas/Desktop/Uni_Niklas/Semester_5/SimulationMethodsPhysicsOne/test_warmup_3.pkl'
+    path = '/home/niklas/Desktop/Uni_Niklas/Semester_5/SimulationMethodsPhysicsOne/test_warmup_4.pkl'
 
     with open(path, 'rb') as fp:
         data = pickle.load(fp)

@@ -270,19 +270,21 @@ if __name__ == "__main__":
         sim.propagate()
 
         if i % SAMPLING_STRIDE == 0:
-            positions.append(sim.x.copy())
-            pressures.append(sim.pressure())
-            energies.append(sim.energy())
             temp = sim.temperature()
-            temperatures.append(temp)
-            rdfs.append(sim.rdf())
-            if extensions:
-                time.append((i * DT) +  final_time)
-            else:
-                time.append(i * DT)
+
+            if not sim.warmup:
+                positions.append(sim.x.copy())
+                pressures.append(sim.pressure())
+                energies.append(sim.energy())
+                temperatures.append(temp)
+                rdfs.append(sim.rdf())
+                if extensions:
+                    time.append((i * DT) +  final_time)
+                else:
+                    time.append(i * DT)
 
             if thermostat_bool:
-                sim.rescale_velocities_to_temp(0.3, temp)
+                sim.rescale_velocities_to_temp(3.0, temp)
 
 
 
