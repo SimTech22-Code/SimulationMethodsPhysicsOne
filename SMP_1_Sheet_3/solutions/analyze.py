@@ -90,6 +90,7 @@ if __name__ == "__main__":
 
 
     path = '/home/niklas/Desktop/Uni_Niklas/Semester_5/SimulationMethodsPhysicsOne/test_warmup_4.pkl'
+    # path = '/home/niklas/Desktop/Uni_Niklas/Semester_5/SimulationMethodsPhysicsOne/SMP_1_Sheet_3/solutions/test_07.pkl'
 
     with open(path, 'rb') as fp:
         data = pickle.load(fp)
@@ -100,11 +101,15 @@ if __name__ == "__main__":
 
     # plot the pressure the energy the temperatur, all of them with running average of windowsizes 10 and 100
 
-    time = data['time']
+    # time = data['time']
     pressures = data['pressures']
     energies = data['energies']
     temperatures = data['temperatures']
 
+    plt.plot(pressures, label='Pressure')
+    plt.show()
+
+    """
     plt.plot(time, pressures, label='Pressure')
     plt.plot(time, running_average(pressures, 10), label='Pressure Running Average 10')
     plt.plot(time, running_average(pressures, 100), label='Pressure Running Average 100')
@@ -122,6 +127,7 @@ if __name__ == "__main__":
     plt.ylabel("Temperature")
     plt.legend()
     plt.show()
+    """
 
 
     plot_rdfs(data)

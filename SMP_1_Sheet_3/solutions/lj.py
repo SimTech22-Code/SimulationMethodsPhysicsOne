@@ -221,6 +221,7 @@ if __name__ == "__main__":
         #                                    np.linspace(0, BOX[1], N_PER_SIDE, endpoint=False)))).T
         # positions are now supposed to me randomly distributed
         x = np.random.random((DIM, N_PART)) * BOX[:, np.newaxis]
+        print(x)
 
         # random particle velocities
         v = 0.5*(2.0 * np.random.random((DIM, N_PART)) - 1.0)
