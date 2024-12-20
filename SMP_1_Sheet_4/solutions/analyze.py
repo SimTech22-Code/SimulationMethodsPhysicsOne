@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 # Load data
 data = pickle.load(open("/home/niklas/Desktop/Uni_Niklas/Semester_5/SimulationMethodsPhysicsOne/SMP_1_Sheet_4/solutions/data_anderson.pkl", "rb"))
-data = pickle.load(open("/home/niklas/Desktop/Uni_Niklas/Semester_5/SimulationMethodsPhysicsOne/SMP_1_Sheet_4/solutions/data_langevin.pkl", "rb"))
+# data = pickle.load(open("/home/niklas/Desktop/Uni_Niklas/Semester_5/SimulationMethodsPhysicsOne/SMP_1_Sheet_4/solutions/data_langevin.pkl", "rb"))
 
 temperature = data["temperature"]         # shape: (n_steps,)
 particle_speeds = data["particle_speeds"] # shape: (n_steps, N)
